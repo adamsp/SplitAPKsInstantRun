@@ -1,0 +1,54 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion '25'
+    defaultConfig {
+        applicationId "com.example.aspeakman.splitapksinstantrun"
+        targetSdkVersion 22
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        splits {
+            abi {
+                enable true
+                include "armeabi-v7a", "x86"
+                universalApk false
+            }
+        }
+    }
+    productFlavors {
+        developer {
+            minSdkVersion 21
+        }
+        prod {
+            // The actual minSdkVersion for the application.
+            minSdkVersion 16
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            // Version codes are generated per:
+            //     https://androidbycode.wordpress.com/2015/06/30/android-ndk-version-code-scheme-for-publishing-apks-per-architecture/
+            output.versionCodeOverride = project.abiCodes.get(output.getFilter(com.android.build.OutputFile.ABI), 0) * 10000000 + android.defaultConfig.versionCode
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:22.2.1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha9'
+    testCompile 'junit:junit:4.12'
+}
